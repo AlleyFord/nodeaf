@@ -42,8 +42,6 @@ class CSV {
     // clean args
     if (opts.hasOwnProperty('columns') && opts.columns === false) opts.group_columns_by_name = false;
 
-    console.log(opts);
-
     return csv_read(readFileSync(this.#fpath), opts);
   }
 
