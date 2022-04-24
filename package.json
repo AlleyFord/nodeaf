@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.1",
   "description": "Alley Ford node magic",
-  "main": "loader.js",
+  "module": "loader.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
