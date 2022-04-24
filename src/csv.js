@@ -22,12 +22,8 @@ class CSV {
   setPath(fpath) {
     if (!fpath) return this.error(`Path is blank: "${fpath}"`);
 
-    if (existsSync(fpath)) {
-      this.#fpath = fpath;
-      return this;
-    }
-
-    return this.error(`Path does not exist: "${fpath}"`);
+    this.#fpath = fpath;
+    return this;
   }
 
 
@@ -54,7 +50,7 @@ class CSV {
 
 
   async write(data) {
-    if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`Path does not exist: ${this.#fpath}`);
+    if (!this.#fpath) return this.error(`Path is blank: "${this.#fpath}"`);
 
     if (data) this.setData(data);
 
