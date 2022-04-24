@@ -31,10 +31,14 @@ class CSV {
   }
 
 
-  read() {
+  read(opts) {
     if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`Path does not exist: ${this.#fpath}`);
 
-    return csv_read(readFileSync(this.#fpath), {columns: true, group_columns_by_name: true});
+    let defaults = {columns: true, group_columns_by_name: true};
+    if (!opts) opts = {};
+    opts = {...defaults, ...opts};
+
+    return csv_read(readFileSync(this.#fpath), opts);
   }
 
 
