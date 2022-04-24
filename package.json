@@ -1,7 +1,7 @@
 {
   "name": "nodeaf",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Alley Ford node magic",
   "main": "loader.js",
   "type": "module",

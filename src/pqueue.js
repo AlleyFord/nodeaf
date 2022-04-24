@@ -1,4 +1,4 @@
-class PQueue {
+class PQ {
   #queue = [];
 
   add(func) {
@@ -13,4 +13,4 @@ class PQueue {
 }
 
 
-export { PQueue };
+export default PQ;

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
+import Cache from './cache.js';
 import { URLSearchParams } from 'url';
-import { Cache as C } from './cache.js';
 
 
 
@@ -30,7 +30,7 @@ class API {
   }
 
   enableCache(dir) {
-    this.cache = new C(dir || `${process.env.__out}/cache`);
+    this.cache = new Cache(dir || `${process.env.__out}/cache`);
   }
   disableCache() {
     this.cache = null;

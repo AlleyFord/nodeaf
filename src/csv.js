@@ -60,7 +60,7 @@ class CSV {
     });
 
     const w = csv_write({
-      path: this.#fname,
+      path: this.#fpath,
       header: header
     });
 
