@@ -1,0 +1,25 @@
+{
+  "name": "nodeaf",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Alley Ford node magic",
+  "main": "loader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlleyFord/nodeaf.git"
+  },
+  "author": "Josh Alley <josh@alley.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AlleyFord/nodeaf/issues"
+  },
+  "homepage": "https://github.com/AlleyFord/nodeaf#readme",
+  "dependencies": {
+    "csv": "^6.0.5",
+    "csv-writer": "^1.6.0",
+    "node-fetch": "^3.2.3"
+  }
+}
