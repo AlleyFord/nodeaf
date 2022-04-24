@@ -35,8 +35,14 @@ class CSV {
     if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`Path does not exist: ${this.#fpath}`);
 
     let defaults = {columns: true, group_columns_by_name: true};
+
     if (!opts) opts = {};
     opts = {...defaults, ...opts};
+
+    // clean args
+    if (opts.hasOwnProperty('columns') && opts.columns === false) opts.group_columns_by_name = false;
+
+    console.log(opts);
 
     return csv_read(readFileSync(this.#fpath), opts);
   }
