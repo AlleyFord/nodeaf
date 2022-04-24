@@ -34,7 +34,7 @@ class CSV {
   read() {
     if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`Path does not exist: ${this.#fpath}`);
 
-    return this.setData(csv_read(readFileSync(this.#fpath), {columns: true, group_columns_by_name: true}));
+    return csv_read(readFileSync(this.#fpath), {columns: true, group_columns_by_name: true});
   }
 
 
