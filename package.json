@@ -1,7 +1,6 @@
 {
-  "name": "nodeaf",
-  "private": true,
-  "version": "1.0.7",
+  "name": "@alleyford/nodeaf",
+  "version": "1.0.8",
   "description": "Alley Ford node magic",
   "module": "loader.js",
   "type": "module",
@@ -12,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/AlleyFord/nodeaf.git"
   },
-  "author": "Josh Alley <josh@alley.io>",
+  "author": "Josh Alley <alley@alleyford.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/AlleyFord/nodeaf/issues"
