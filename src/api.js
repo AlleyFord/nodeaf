@@ -105,11 +105,8 @@ class API {
     }
 
 
-    // cache hit before trying live
-    // EXPERIMENTAL RIGHT NOW. only works on shit where you don't need header inspection (non-paged API calls)
-    const hashkey = this.cache.createKey(JSON.stringify(URI) + JSON.stringify(request));
-
     if (this.cache) {
+      const hashkey = this.cache.createKey(JSON.stringify(URI) + JSON.stringify(request));
       let cachehit = this.cache.get(hashkey);
 
       if (cachehit) {
