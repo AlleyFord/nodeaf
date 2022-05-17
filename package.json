@@ -2,7 +2,7 @@
   "name": "@alleyford/nodeaf",
   "version": "1.0.8",
   "description": "Alley Ford node magic",
-  "module": "loader.js",
+  "main": "loader.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
