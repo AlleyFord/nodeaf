@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import Cache from './cache.js';
 import { URLSearchParams } from 'url';
 
 
@@ -11,29 +10,37 @@ class API {
   simplify_return = true;
   cursor = [];
 
-  cache = null;
+  debug = false;
+  debugg = false;
+
+  graph = false;
+
+  MIME_JSON = 'application/json';
+  MIME_URLENC = 'application/x-www-form-urlencoded';
+  MIME_FORM = 'application/x-www-form-urlencoded';
+  MIME_GRAPH = 'application/graphql';
 
   constructor(opts) {
     this.last_run = new Date().getTime();
 
-    if (opts && opts.cache) {
-      this.enableCache(opts.cache_dir);
-    }
+    if (opts.debug) this.debug = opts.debug;
+    if (opts.debugg) this.debugg = opts.debugg;
   }
 
-  _resetCursor() {
+  resetCursor() {
     this.cursor = {
-      page: null, // unused ATM
+      page: null,
       next: null,
       previous: null,
     };
   }
 
-  enableCache(dir) {
-    this.cache = new Cache(dir || `${process.env.__out}/cache`);
-  }
-  disableCache() {
-    this.cache = null;
+  apply(keys, vars) {
+    for (const k of keys) {
+      if (this.hasOwnProperty(k) && vars.hasOwnProperty(k)) {
+        this[k] = vars[k];
+      }
+    }
   }
 
   hasNext() {
@@ -50,35 +57,65 @@ class API {
   next() {
     if (!this.hasNext()) return false;
 
-    return this._request('get', null, null, new URL(this.cursor.next));
+    return this.request('get', new URL(this.cursor.next));
   }
 
   previous() {
     if (!this.hasPrevious()) return false;
 
-    return this._request('get', null, null, new URL(this.cursor.previous));
+    return this.request('get', new URL(this.cursor.previous));
   }
   prev() {
     return this.previous();
   }
 
-  _request(method, path, opts, directURI) {
-    this._resetCursor();
 
-    let URI = (path === null && opts === null) ? directURI : this._buildURI(path);
+  buildURI(path) { // overload me
+    return path;
+  }
+  buildHeaders() { // overload me
+    return {};
+  }
+  optsHook(opts) { // overload me
+    return opts;
+  }
 
-    if (typeof this._optsHook === 'function') opts = this._optsHook(opts);
 
-    let headers = (typeof this._buildHeaders === 'function') ? this._buildHeaders() : {};
+  request(method, URI, opts) {
+    this.resetCursor();
+
+    if (typeof this.optsHook === 'function') opts = this.optsHook(opts);
+
+    let headers = (typeof this.buildHeaders === 'function') ? this.buildHeaders() : {};
+
+    if (opts && opts.headers) {
+      headers = {...headers, ...opts.headers};
+      delete opts.headers;
+    }
 
     let request = {
       headers: headers,
       method: method,
+      redirect: 'follow',
     };
 
     if (opts) {
       if (method === 'get') {
-        Object.keys(opts).forEach(key => URI.searchParams.append(key, opts[key]));
+        let enc_opt = '';
+
+        Object.keys(opts).forEach(key => {
+          if (Array.isArray(opts[key])) {
+            enc_opt = opts[key]; // leave alone
+          }
+          else if (opts[key] === Object(opts[key])) {
+            enc_opt = JSON.stringify(opts[key]);
+          }
+          else {
+            enc_opt = opts[key];
+          }
+
+          URI.searchParams.append(key, enc_opt)
+        });
       }
       else if (['post', 'put'].includes(method)) {
         let isURLEncoded = false;
@@ -104,16 +141,10 @@ class API {
       }
     }
 
-
-    if (this.cache) {
-      const hashkey = this.cache.createKey(JSON.stringify(URI) + JSON.stringify(request));
-      let cachehit = this.cache.get(hashkey);
-
-      if (cachehit) {
-        return new Promise((resolve, reject) => {
-          resolve(JSON.parse(cachehit));
-        });
-      }
+    // graphql support
+    if (this.graph) {
+      request.body = opts;
+      console.log(request.body);
     }
 
     return new Promise((resolve, reject) => {
@@ -126,11 +157,13 @@ class API {
 
       resolve();
     })
-    .then(() => {
-      //console.log(URI, request);
+    .then(_ => {
+      if (this.debug) console.log(URI, request);
 
       return fetch(URI, request)
         .then(res => {
+          if (this.debugg) console.log(res);
+
           let is_json_return = true;
 
           if (typeof res.headers !== 'undefined') {
@@ -168,25 +201,25 @@ class API {
             ? ret[jk[0]]
             : ret;
 
-          if (this.cache) {
-            this.cache.set(hashkey, JSON.stringify(finishedData));
-          }
-
           return finishedData;
       });
     });
   }
 
   get(path, opts) {
-    return this._request('get', path, opts);
+    return this.request('get', this.buildURI(path), opts);
   }
 
   post(path, opts) {
-    return this._request('post', path, opts);
+    return this.request('post', this.buildURI(path), opts);
   }
 
   put(path, opts) {
-    return this._request('put', path, opts);
+    return this.request('put', this.buildURI(path), opts);
+  }
+
+  del(path, opts) {
+    return this.request('delete', this.buildURI(path), opts);
   }
 }
 
