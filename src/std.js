@@ -3,6 +3,14 @@ function die(v) {
   process.exit();
 }
 
+function out(v) {
+  process.stdout.write(v);
+}
+
+function iterable(v) {
+  if (v === null || v === undefined) return false;
+  return typeof v[Symbol.iterator] === 'function';
+}
 
 
-export { die };
+export { die, out, iterable };
