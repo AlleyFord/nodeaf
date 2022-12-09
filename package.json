@@ -1,6 +1,6 @@
 {
   "name": "@alleyford/nodeaf",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Alley Ford node magic",
   "main": "loader.js",
   "type": "module",
