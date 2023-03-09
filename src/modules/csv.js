@@ -1,10 +1,12 @@
-import { createObjectCsvWriter as csv_write } from 'csv-writer';
-import { readFileSync, existsSync } from 'fs';
-import { parse as csv_read } from 'csv/sync';
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const { readFileSync, existsSync } = require('fs');
+const { parse } = require('csv/sync');
+const csv_read = parse;
+const csv_write = createCsvWriter;
 
 
 
-class CSV {
+module.exports = class CSV {
   #fpath = false;
   #data = [];
 
@@ -20,7 +22,7 @@ class CSV {
 
 
   setPath(fpath) {
-    if (!fpath) return this.error(`Path is blank: "${fpath}"`);
+    if (!fpath) return this.error(`path is blank: "${fpath}"`);
 
     this.#fpath = fpath;
     return this;
@@ -28,9 +30,9 @@ class CSV {
 
 
   read(opts) {
-    if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`Path does not exist: ${this.#fpath}`);
+    if (!this.#fpath || !existsSync(this.#fpath)) return this.error(`path does not exist: ${this.#fpath}`);
 
-    let defaults = {columns: true, group_columns_by_name: true};
+    let defaults = {columns: true, group_columns_by_name: true, delimiter: ','};
 
     if (!opts) opts = {};
     opts = {...defaults, ...opts};
@@ -38,7 +40,7 @@ class CSV {
     // clean args
     if (opts.hasOwnProperty('columns') && opts.columns === false) opts.group_columns_by_name = false;
 
-    return csv_read(readFileSync(this.#fpath), opts);
+    return csv_read(readFileSync(this.#fpath, 'utf8'), opts);
   }
 
 
@@ -50,7 +52,7 @@ class CSV {
 
 
   async write(data) {
-    if (!this.#fpath) return this.error(`Path is blank: "${this.#fpath}"`);
+    if (!this.#fpath) return this.error(`path is blank: "${this.#fpath}"`);
 
     if (data) this.setData(data);
 
@@ -73,7 +75,3 @@ class CSV {
     return true;
   }
 }
-
-
-
-export default CSV;

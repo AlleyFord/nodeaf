@@ -1,19 +1,20 @@
-import fetch from 'node-fetch';
-import { URLSearchParams } from 'url';
+const fetch = require('node-fetch');
+const { URLSearchParams } = require('url');
 
 
 
-class API {
+module.exports = class API {
   version;
   last_run = 0;
   delay = 600;
   simplify_return = true;
   cursor = [];
 
+  status;
+
   debug = false;
   debugg = false;
-
-  graph = false;
+  debuggg = false;
 
   MIME_JSON = 'application/json';
   MIME_URLENC = 'application/x-www-form-urlencoded';
@@ -25,6 +26,13 @@ class API {
 
     if (opts.debug) this.debug = opts.debug;
     if (opts.debugg) this.debugg = opts.debugg;
+    if (opts.debuggg) this.debugg = opts.debuggg;
+
+    this.resetCursor();
+  }
+
+  setDelay(v) {
+    this.delay = parseInt(v);
   }
 
   resetCursor() {
@@ -56,14 +64,11 @@ class API {
 
   next() {
     if (!this.hasNext()) return false;
-
-    return this.request('get', new URL(this.cursor.next));
+    return this.get(this.cursor.next);
   }
-
   previous() {
     if (!this.hasPrevious()) return false;
-
-    return this.request('get', new URL(this.cursor.previous));
+    return this.get(this.cursor.previous);
   }
   prev() {
     return this.previous();
@@ -78,6 +83,82 @@ class API {
   }
   optsHook(opts) { // overload me
     return opts;
+  }
+  responseHook(res) { // overload me
+    return;
+  }
+  endHook(ret) { // overload me
+    return;
+  }
+
+
+  graph(query) {
+    this.resetCursor();
+
+    if (typeof this.queryHookGraph === 'function') query = this.queryHookGraph(query);
+
+    let headers = (typeof this.buildHeadersGraph === 'function') ? this.buildHeadersGraph() : {};
+
+    if (query && query.headers) {
+      headers = {...headers, ...query.headers};
+      delete query.headers;
+    }
+
+    let request = {
+      headers: headers,
+      method: 'post',
+      redirect: 'follow',
+    };
+
+    if (query) {
+      if (query.hasOwnProperty('query')) {
+        query.query = String(query.query).replace(/\n/g, '').trim();
+      }
+
+      request.body = JSON.stringify(query);
+    }
+
+    return new Promise((resolve, reject) => {
+      let t = 0;
+
+      // this ensures we don't beat up the api
+      do {
+        t = new Date().getTime();
+      } while (t - this.last_run < this.delay * (Math.random() + 1));
+
+      resolve();
+    })
+    .then(_ => {
+      const URI = this.buildURIGraph();
+
+      if (this.debug) console.log(URI, request, request.body);
+
+      return fetch(URI, request)
+        .then(res => {
+          if (this.debugg) console.log("RESPONSE", res);
+
+          this.status = res.status;
+
+          if (typeof this.responseHookGraph === 'function') {
+            this.responseHookGraph(res);
+          }
+
+          return res.json();
+        })
+        .then(ret => {
+          if (this.debuggg) console.log("RETURNED RESPONSE", ret);
+
+          const jk = Object.keys(ret);
+
+          this.last_run = new Date().getTime();
+
+          const finishedData = (this.simplify_return && jk.length)
+            ? ret[jk[0]]
+            : ret;
+
+          return finishedData;
+        });
+    });
   }
 
 
@@ -141,12 +222,6 @@ class API {
       }
     }
 
-    // graphql support
-    if (this.graph) {
-      request.body = opts;
-      console.log(request.body);
-    }
-
     return new Promise((resolve, reject) => {
       let t = 0;
 
@@ -158,11 +233,13 @@ class API {
       resolve();
     })
     .then(_ => {
-      if (this.debug) console.log(URI, request);
+      if (this.debug) console.log(URI, request, request.body);
 
       return fetch(URI, request)
         .then(res => {
-          if (this.debugg) console.log(res);
+          if (this.debugg) console.log("RESPONSE", res);
+
+          this.status = res.status;
 
           let is_json_return = true;
 
@@ -186,28 +263,49 @@ class API {
             }
           }
 
-          if (typeof this._responseHook === 'function') {
-            this._responseHook(res);
+          if (typeof this.responseHook === 'function') {
+            this.responseHook(res);
           }
+
+          if (res.status == 204) return is_json_return ? {} : '';
 
           return is_json_return ? res.json() : res.text();
         })
         .then(ret => {
+          if (this.debuggg) console.log("RETURNED RESPONSE", ret);
+
           const jk = Object.keys(ret);
 
           this.last_run = new Date().getTime();
 
-          const finishedData = (this.simplify_return && jk.length)
-            ? ret[jk[0]]
-            : ret;
+          if (typeof this.endHook === 'function') {
+            this.endHook(ret);
+          }
+
+          let finishedData = ret;
+
+          if (typeof this.simplifyReturnHook === 'function') {
+            finishedData = this.simplifyReturnHook(ret);
+          }
+          else if (this.simplify_return && jk.length) {
+            finishedData = ret[jk[0]];
+          }
 
           return finishedData;
       });
     });
   }
 
+  isOK() {
+    const status = parseInt(this.status);
+    return (status >= 200 && status <= 299);
+  }
+
   get(path, opts) {
     return this.request('get', this.buildURI(path), opts);
+  }
+  getURL(url) {
+    return this.request('get', this.buildURI(url));
   }
 
   post(path, opts) {
@@ -222,7 +320,3 @@ class API {
     return this.request('delete', this.buildURI(path), opts);
   }
 }
-
-
-
-export default API;
