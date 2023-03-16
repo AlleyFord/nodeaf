@@ -9,6 +9,7 @@ const csv_write = createCsvWriter;
 module.exports = class CSV {
   #fpath = false;
   #data = [];
+  #header = [];
 
 
   constructor(fpath) {
@@ -50,20 +51,33 @@ module.exports = class CSV {
     return this;
   }
 
+  setHeaders(arr) {
+    arr.forEach((k, i) => {
+      this.#header.push({
+        id: k, title: k
+      });
+    });
+  }
 
   async write(data) {
     if (!this.#fpath) return this.error(`path is blank: "${this.#fpath}"`);
 
     if (data) this.setData(data);
 
-    const peek = Object.keys(this.#data[0]);
     let header = [];
 
-    peek.forEach((k, i) => {
-      header.push({
-        id: k, title: k
+    if (!this.#header.length) {
+      const peek = Object.keys(this.#data[0]);
+
+      peek.forEach((k, i) => {
+        header.push({
+          id: k, title: k
+        });
       });
-    });
+    }
+    else {
+      header = this.#header;
+    }
 
     const w = csv_write({
       path: this.#fpath,

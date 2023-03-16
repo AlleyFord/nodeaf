@@ -1,12 +1,14 @@
+const Core = require('../core.js');
 const { readFileSync, writeFileSync, existsSync } = require('fs');
 const { createHash } = require('crypto');
 
 
 
-module.exports = class Cache {
+module.exports = class Cache extends Core {
   path;
 
   constructor(path) {
+    super();
     this.setPath(path);
   }
 
@@ -22,11 +24,11 @@ module.exports = class Cache {
     return `${this.path}/${key}`;
   }
 
-  has(key) {
-    return this.exists(key);
-  }
   exists(key) {
     return existsSync(this.buildPath(key));
+  }
+  has(key) {
+    return this.exists(key);
   }
 
   get(key) {

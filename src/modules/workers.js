@@ -1,22 +1,18 @@
-const CoreMethods = require('../core.js');
+const Core = require('../core.js');
 const BQueue = require('better-queue');
-const fs = require('fs');
+const { appendFileSync } = require('fs');
 
 
 
-class Worker {
+class Worker extends Core {
   namespace;
   meta;
 
   friendlyNamespace;
 
-  constructor(obj) {
-    for (const [k, v] of Object.entries(obj)) {
-      if (this.hasOwnProperty(k) || typeof this[k] === 'function') {
-        this[k] = v;
-      }
-    }
-
+  constructor(opts) {
+    super();
+    this.apply(opts);
     this.friendlyNamespace = this.namespace.replaceAll('/', '-');
   }
 
@@ -28,7 +24,7 @@ class Worker {
 }
 
 
-module.exports = class Workers extends CoreMethods {
+module.exports = class Workers extends Core {
   cache;
   logging = false;
   logDir = false;
@@ -108,7 +104,7 @@ module.exports = class Workers extends CoreMethods {
           console.log(errStr);
 
           if (this.canLog()) {
-            fs.appendFileSync(`${this.logDir}/${worker.friendlyNamespace}.txt`, `${errStr}\n`);
+            appendFileSync(`${this.logDir}/${worker.friendlyNamespace}.txt`, `${errStr}\n`);
           }
         }
         else {

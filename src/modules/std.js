@@ -1,7 +1,7 @@
 module.exports = class STD {
   // output
   die(...v) {
-    console.log(...v);
+    if (v.length) console.log(...v);
     process.exit();
   }
   line(...v) {

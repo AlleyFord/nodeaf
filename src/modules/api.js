@@ -1,9 +1,9 @@
-const fetch = require('node-fetch');
+const Core = require('../core.js');
 const { URLSearchParams } = require('url');
 
 
 
-module.exports = class API {
+module.exports = class API extends Core {
   version;
   last_run = 0;
   delay = 600;
@@ -22,12 +22,10 @@ module.exports = class API {
   MIME_GRAPH = 'application/graphql';
 
   constructor(opts) {
+    super();
+    this.apply(opts);
+
     this.last_run = new Date().getTime();
-
-    if (opts.debug) this.debug = opts.debug;
-    if (opts.debugg) this.debugg = opts.debugg;
-    if (opts.debuggg) this.debugg = opts.debuggg;
-
     this.resetCursor();
   }
 
@@ -41,14 +39,6 @@ module.exports = class API {
       next: null,
       previous: null,
     };
-  }
-
-  apply(keys, vars) {
-    for (const k of keys) {
-      if (this.hasOwnProperty(k) && vars.hasOwnProperty(k)) {
-        this[k] = vars[k];
-      }
-    }
   }
 
   hasNext() {

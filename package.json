@@ -16,6 +16,9 @@
     "url": "https://github.com/AlleyFord/nodeaf/issues"
   },
   "homepage": "https://github.com/AlleyFord/nodeaf#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "better-queue": "^3.8.12",
     "csv": "^6.0.5",
