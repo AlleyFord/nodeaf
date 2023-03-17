@@ -21,6 +21,9 @@ module.exports = class NodeAF {
   get workers() {
     return this.#proto('workers');
   }
+  get lambda() {
+    return this.#proto('lambda');
+  }
   get queue() {
     return this.workers;
   }
